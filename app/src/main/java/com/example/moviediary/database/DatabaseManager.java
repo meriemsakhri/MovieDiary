@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.example.moviediary.model.User;
 import com.example.moviediary.model.Movie;
+import com.example.moviediary.security.PasswordUtils;
+
 
 public class DatabaseManager {
     private DatabaseHelper dbHelper;
@@ -30,15 +32,20 @@ public class DatabaseManager {
      * Add a new user to the database
      */
     public boolean addUser(User user) {
+        String salt = PasswordUtils.generateSalt();
+        String hash = PasswordUtils.hashPassword(user.getPassword(), salt);
+
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.COLUMN_USERNAME, user.getUsername());
         values.put(DatabaseHelper.COLUMN_EMAIL, user.getEmail());
-        values.put(DatabaseHelper.COLUMN_PASSWORD, user.getPassword()); // In real app, hash this!
+        values.put(DatabaseHelper.COLUMN_PASSWORD_HASH, hash);
+        values.put(DatabaseHelper.COLUMN_SALT, salt);
         values.put(DatabaseHelper.COLUMN_PREFERENCES, user.getPreferences());
 
         long result = database.insert(DatabaseHelper.TABLE_USERS, null, values);
         return result != -1;
     }
+
 
     /**
      * Get user by email and password (for login)
@@ -47,25 +54,32 @@ public class DatabaseManager {
         Cursor cursor = database.query(
                 DatabaseHelper.TABLE_USERS,
                 null,
-                DatabaseHelper.COLUMN_EMAIL + " = ? AND " + DatabaseHelper.COLUMN_PASSWORD + " = ?",
-                new String[]{email, password},
+                DatabaseHelper.COLUMN_EMAIL + " = ?",
+                new String[]{email},
                 null, null, null
         );
 
         if (cursor != null && cursor.moveToFirst()) {
-            User user = new User();
-            user.setId(cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_ID)));
-            user.setUsername(cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_USERNAME)));
-            user.setEmail(cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_EMAIL)));
-            user.setPreferences(cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_PREFERENCES)));
-            cursor.close();
-            return user;
+            String salt = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_SALT));
+            String hash = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_PASSWORD_HASH));
+
+            boolean ok = PasswordUtils.verifyPassword(password, salt, hash);
+
+            if (ok) {
+                User user = new User();
+                user.setId(cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_ID)));
+                user.setUsername(cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_USERNAME)));
+                user.setEmail(cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_EMAIL)));
+                user.setPreferences(cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_PREFERENCES)));
+                cursor.close();
+                return user;
+            }
         }
-        if (cursor != null) {
-            cursor.close();
-        }
+
+        if (cursor != null) cursor.close();
         return null;
     }
+
 
     /**
      * Check if email already exists

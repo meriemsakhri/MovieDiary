@@ -13,16 +13,6 @@
         android:orientation="vertical"
         android:layout_marginTop="40dp">
 
-        <!-- BACK TO HOME BUTTON  -->
-        <Button
-            android:id="@+id/btn_back_home"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            android:backgroundTint="@android:color/transparent"
-            android:text="← Back to Home"
-            android:textColor="?attr/colorPrimary"
-            android:textStyle="bold" />
 
         <!-- Title -->
         <TextView

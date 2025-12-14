@@ -15,7 +15,7 @@ import com.example.moviediary.model.User;
 
 public class RegisterActivity extends AppCompatActivity {
     private EditText etUsername, etEmail, etPassword;
-    private Button btnRegister, btnBackHome;
+    private Button btnRegister;
     private DatabaseManager dbManager;
 
     @Override
@@ -37,7 +37,7 @@ public class RegisterActivity extends AppCompatActivity {
         etEmail = findViewById(R.id.et_email);
         etPassword = findViewById(R.id.et_password);
         btnRegister = findViewById(R.id.btn_register);
-        btnBackHome = findViewById(R.id.btn_back_home);  // INITIALIZE BACK BUTTON
+
 
         TextView tvLogin = findViewById(R.id.tv_login_link);
 
@@ -49,13 +49,7 @@ public class RegisterActivity extends AppCompatActivity {
             }
         });
 
-        // BACK TO HOME BUTTON LISTENER
-        btnBackHome.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                goBackToHome();
-            }
-        });
+
 
         // Setup login link click listener
         if (tvLogin != null) {

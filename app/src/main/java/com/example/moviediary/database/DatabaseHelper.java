@@ -7,7 +7,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "MovieDiary.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
+
 
     // Table names
     public static final String TABLE_USERS = "users";
@@ -20,7 +21,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Users table columns
     public static final String COLUMN_USERNAME = "username";
     public static final String COLUMN_EMAIL = "email";
-    public static final String COLUMN_PASSWORD = "password";
+    public static final String COLUMN_PASSWORD_HASH = "password_hash";
+    public static final String COLUMN_SALT = "salt";
+
     public static final String COLUMN_PREFERENCES = "preferences";
 
     // Movies table columns
@@ -42,9 +45,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                     COLUMN_USERNAME + " TEXT UNIQUE NOT NULL," +
                     COLUMN_EMAIL + " TEXT UNIQUE NOT NULL," +
-                    COLUMN_PASSWORD + " TEXT NOT NULL," +
-                    COLUMN_PREFERENCES + " TEXT" + // Optional field
+                    COLUMN_PASSWORD_HASH + " TEXT NOT NULL," +
+                    COLUMN_SALT + " TEXT NOT NULL," +
+                    COLUMN_PREFERENCES + " TEXT" +
                     ")";
+
 
     private static final String CREATE_MOVIES_TABLE =
             "CREATE TABLE " + TABLE_MOVIES + "(" +

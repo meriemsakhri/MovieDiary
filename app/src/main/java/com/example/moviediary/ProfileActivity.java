@@ -99,11 +99,12 @@ public class ProfileActivity extends AppCompatActivity {
         // Show confirmation message
         Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show();
 
-        // Redirect to HomeActivity (which will show Login/Register menu)
-        Intent intent = new Intent(ProfileActivity.this, HomeActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-        finish();
+
+        // go to Welcome page  and clear back stack
+        Intent i = new Intent(ProfileActivity.this, WelcomeActivity.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(i);
+        finish(); // close ProfileActivity
     }
 
     @Override

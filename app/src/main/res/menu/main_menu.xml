@@ -10,16 +10,6 @@
         app:showAsAction="ifRoom|collapseActionView"
         app:actionViewClass="androidx.appcompat.widget.SearchView" />
 
-    <!-- LOGGED OUT STATE (shown when not logged in) -->
-    <item
-        android:id="@+id/action_login"
-        android:title="Login"
-        app:showAsAction="never" />
-
-    <item
-        android:id="@+id/action_register"
-        android:title="Register"
-        app:showAsAction="never" />
 
     <!-- LOGGED IN STATE (shown when logged in) -->
     <item
