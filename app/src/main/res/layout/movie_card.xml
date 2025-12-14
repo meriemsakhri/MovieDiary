@@ -15,7 +15,7 @@
         android:orientation="vertical"
         android:padding="12dp">
 
-        <!-- Movie Poster Image -->
+        <!-- Poster -->
         <ImageView
             android:id="@+id/movie_image"
             android:layout_width="match_parent"
@@ -25,18 +25,36 @@
             android:contentDescription="@string/movie_poster"
             tools:src="@tools:sample/backgrounds/scenic" />
 
-        <!-- Movie Title -->
-        <TextView
-            android:id="@+id/movie_title"
+        <!-- Title + Wishlist icon -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
             android:layout_marginTop="8dp"
-            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-            android:textColor="@color/black"
-            android:textStyle="bold"
-            tools:text="Inception" />
+            android:gravity="center_vertical">
 
-        <!-- Movie Genre -->
+            <TextView
+                android:id="@+id/movie_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                android:textColor="@color/black"
+                android:textStyle="bold"
+                tools:text="Inception" />
+
+            <!-- Wishlist icon (hidden by default) -->
+            <ImageView
+                android:id="@+id/imgWishlist"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_favorite"
+                android:tint="@color/purple_500"
+                android:visibility="gone"
+                android:contentDescription="Wishlist" />
+        </LinearLayout>
+
+        <!-- Genre -->
         <TextView
             android:id="@+id/movie_genre"
             android:layout_width="match_parent"
@@ -47,7 +65,7 @@
             android:textStyle="italic"
             tools:text="Sci-Fi, Action" />
 
-        <!-- Movie Description (short) -->
+        <!-- Description -->
         <TextView
             android:id="@+id/movie_description"
             android:layout_width="match_parent"
@@ -59,7 +77,7 @@
             android:textColor="@color/black"
             tools:text="A thief who steals corporate secrets through the use of dream-sharing technology." />
 
-        <!-- Release Year -->
+        <!-- Year -->
         <TextView
             android:id="@+id/movie_year"
             android:layout_width="match_parent"
@@ -68,6 +86,18 @@
             android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
             android:textColor="@color/gray"
             tools:text="2010" />
+
+        <!-- Rating (WATCHED only) -->
+        <RatingBar
+            android:id="@+id/ratingBarCard"
+            style="?android:attr/ratingBarStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:numStars="5"
+            android:stepSize="1"
+            android:isIndicator="true"
+            android:visibility="gone"
+            android:layout_marginTop="6dp" />
 
     </LinearLayout>
 

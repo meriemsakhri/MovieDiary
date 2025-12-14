@@ -5,70 +5,93 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+/**
+ * SQLite DB for MovieDiary.
+ * - users: authentication + preferences
+ * - movies: catalog
+ * - user_movies: diary (one row per (user_id, movie_id))
+ */
 public class DatabaseHelper extends SQLiteOpenHelper {
+
     private static final String DATABASE_NAME = "MovieDiary.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
-
-    // Table names
+    // =======================
+    // TABLE NAMES
+    // =======================
     public static final String TABLE_USERS = "users";
     public static final String TABLE_MOVIES = "movies";
     public static final String TABLE_USER_MOVIES = "user_movies";
 
-    // Common column names
+    // =======================
+    // COMMON COLUMNS
+    // =======================
     public static final String COLUMN_ID = "id";
 
-    // Users table columns
+    // =======================
+    // USERS COLUMNS
+    // =======================
     public static final String COLUMN_USERNAME = "username";
     public static final String COLUMN_EMAIL = "email";
     public static final String COLUMN_PASSWORD_HASH = "password_hash";
     public static final String COLUMN_SALT = "salt";
+    public static final String COLUMN_PREFERENCES = "preferences"; // CSV: "Action,Drama,Sci-Fi"
 
-    public static final String COLUMN_PREFERENCES = "preferences";
-
-    // Movies table columns
+    // =======================
+    // MOVIES COLUMNS
+    // =======================
     public static final String COLUMN_TITLE = "title";
     public static final String COLUMN_POSTER_URL = "poster_url";
     public static final String COLUMN_DESCRIPTION = "description";
     public static final String COLUMN_RELEASE_YEAR = "release_year";
     public static final String COLUMN_GENRE = "genre";
 
-    // User_Movies table columns
+    // =======================
+    // USER_MOVIES COLUMNS
+    // =======================
     public static final String COLUMN_USER_ID = "user_id";
     public static final String COLUMN_MOVIE_ID = "movie_id";
-    public static final String COLUMN_IS_WATCHED = "is_watched";
-    public static final String COLUMN_RATING = "rating";
 
-    // Table creation queries
+    // We use: "WISHLIST" or "WATCHED"
+    public static final String COLUMN_STATUS = "status";
+    public static final String COLUMN_RATING = "rating"; // 0..5
+
+    // Optional: status values (useful to avoid typos)
+    public static final String STATUS_WISHLIST = "WISHLIST";
+    public static final String STATUS_WATCHED = "WATCHED";
+
+    // =======================
+    // CREATE TABLES
+    // =======================
     private static final String CREATE_USERS_TABLE =
-            "CREATE TABLE " + TABLE_USERS + "(" +
-                    COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                    COLUMN_USERNAME + " TEXT UNIQUE NOT NULL," +
-                    COLUMN_EMAIL + " TEXT UNIQUE NOT NULL," +
-                    COLUMN_PASSWORD_HASH + " TEXT NOT NULL," +
-                    COLUMN_SALT + " TEXT NOT NULL," +
+            "CREATE TABLE " + TABLE_USERS + " (" +
+                    COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    COLUMN_USERNAME + " TEXT UNIQUE NOT NULL, " +
+                    COLUMN_EMAIL + " TEXT UNIQUE NOT NULL, " +
+                    COLUMN_PASSWORD_HASH + " TEXT NOT NULL, " +
+                    COLUMN_SALT + " TEXT NOT NULL, " +
                     COLUMN_PREFERENCES + " TEXT" +
                     ")";
 
-
     private static final String CREATE_MOVIES_TABLE =
-            "CREATE TABLE " + TABLE_MOVIES + "(" +
-                    COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                    COLUMN_TITLE + " TEXT NOT NULL," +
-                    COLUMN_POSTER_URL + " TEXT," +
-                    COLUMN_DESCRIPTION + " TEXT," +
-                    COLUMN_RELEASE_YEAR + " INTEGER," +
-                    COLUMN_GENRE + " TEXT" + // New genre field
+            "CREATE TABLE " + TABLE_MOVIES + " (" +
+                    COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    COLUMN_TITLE + " TEXT NOT NULL, " +
+                    COLUMN_POSTER_URL + " TEXT, " +
+                    COLUMN_DESCRIPTION + " TEXT, " +
+                    COLUMN_RELEASE_YEAR + " INTEGER, " +
+                    COLUMN_GENRE + " TEXT" +
                     ")";
 
     private static final String CREATE_USER_MOVIES_TABLE =
-            "CREATE TABLE " + TABLE_USER_MOVIES + "(" +
-                    COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                    COLUMN_USER_ID + " INTEGER," +
-                    COLUMN_MOVIE_ID + " INTEGER," +
-                    COLUMN_IS_WATCHED + " INTEGER DEFAULT 0," +
-                    COLUMN_RATING + " INTEGER DEFAULT 0," +
-                    "FOREIGN KEY(" + COLUMN_USER_ID + ") REFERENCES " + TABLE_USERS + "(" + COLUMN_ID + ")," +
+            "CREATE TABLE " + TABLE_USER_MOVIES + " (" +
+                    COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    COLUMN_USER_ID + " INTEGER NOT NULL, " +
+                    COLUMN_MOVIE_ID + " INTEGER NOT NULL, " +
+                    COLUMN_STATUS + " TEXT NOT NULL DEFAULT '" + STATUS_WISHLIST + "', " +
+                    COLUMN_RATING + " INTEGER DEFAULT 0, " +
+                    "UNIQUE(" + COLUMN_USER_ID + ", " + COLUMN_MOVIE_ID + "), " +
+                    "FOREIGN KEY(" + COLUMN_USER_ID + ") REFERENCES " + TABLE_USERS + "(" + COLUMN_ID + "), " +
                     "FOREIGN KEY(" + COLUMN_MOVIE_ID + ") REFERENCES " + TABLE_MOVIES + "(" + COLUMN_ID + ")" +
                     ")";
 
@@ -77,29 +100,34 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     @Override
+    public void onConfigure(SQLiteDatabase db) {
+        super.onConfigure(db);
+        // Enforce foreign keys (helps keep DB consistent)
+        db.setForeignKeyConstraintsEnabled(true);
+    }
+
+    @Override
     public void onCreate(SQLiteDatabase db) {
-        // Create all tables
         db.execSQL(CREATE_USERS_TABLE);
         db.execSQL(CREATE_MOVIES_TABLE);
         db.execSQL(CREATE_USER_MOVIES_TABLE);
 
-        // Pre-populate with sample movies
         insertSampleMovies(db);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // Drop older tables if they exist
+        // Simple strategy for this project: recreate tables
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_USER_MOVIES);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_MOVIES);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
-
-        // Create tables again
         onCreate(db);
     }
 
+    // =======================
+    // SAMPLE DATA
+    // =======================
     private void insertSampleMovies(SQLiteDatabase db) {
-        // Sample movies data with genres
         String[][] sampleMovies = {
                 {"Inception", "https://image.tmdb.org/t/p/w500/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg", "A thief who steals corporate secrets through the use of dream-sharing technology.", "2010", "Sci-Fi, Action"},
                 {"The Dark Knight", "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg", "Batman faces the Joker, a criminal mastermind who seeks to undermine Batman's influence.", "2008", "Action, Crime, Drama"},

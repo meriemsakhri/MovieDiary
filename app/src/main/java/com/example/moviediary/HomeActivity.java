@@ -20,8 +20,10 @@ public class HomeActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private MovieAdapter adapter;
+
     private DatabaseManager dbManager;
     private SessionManager sessionManager;
+
     private SearchView searchView;
 
     @Override
@@ -41,39 +43,30 @@ public class HomeActivity extends AppCompatActivity {
         setupRecyclerView();
         loadMovies();
 
-        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                if (searchView != null && !searchView.isIconified()) {
-                    searchView.setIconified(true);
-                } else {
-                    setEnabled(false);
-                    HomeActivity.super.onBackPressed();
-                }
-            }
-        });
+        setupBackPressBehavior();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
 
-        // Setup SearchView
         MenuItem searchItem = menu.findItem(R.id.action_search);
         if (searchItem != null) {
             searchView = (SearchView) searchItem.getActionView();
             setupSearchView();
         }
 
-        // IMPORTANT: menu visibility handled in onPrepareOptionsMenu()
+        MenuItem diary = menu.findItem(R.id.action_diary);
+        if (diary != null) diary.setVisible(sessionManager.isLoggedIn());
+
         return true;
     }
-
 
     @Override
     protected void onResume() {
         super.onResume();
         invalidateOptionsMenu(); // refresh menu visibility
+        loadMovies();            // refresh list (personalization + watched/wishlist UI)
     }
 
     @Override
@@ -86,8 +79,40 @@ public class HomeActivity extends AppCompatActivity {
         if (profile != null) profile.setVisible(loggedIn);
         if (logout != null) logout.setVisible(loggedIn);
 
-
         return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_profile) {
+            open(ProfileActivity.class);
+            return true;
+        }
+
+        if (id == R.id.action_diary) {
+            open(MyDiaryActivity.class);
+            return true;
+        }
+
+        if (id == R.id.action_logout) {
+            sessionManager.logoutUser();
+            Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show();
+
+            Intent i = new Intent(this, WelcomeActivity.class);
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(i);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void setupRecyclerView() {
+        recyclerView = findViewById(R.id.recycler_view);
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+        recyclerView.setHasFixedSize(true);
     }
 
     private void setupSearchView() {
@@ -122,7 +147,13 @@ public class HomeActivity extends AppCompatActivity {
     private void performSearch(String query) {
         Cursor cursor = dbManager.searchMovies(query);
 
-        adapter.swapCursor(cursor);
+        // Safety: if user searches before adapter is initialized
+        if (adapter == null) {
+            adapter = new MovieAdapter(cursor);
+            recyclerView.setAdapter(adapter);
+        } else {
+            adapter.swapCursor(cursor);
+        }
 
         if (cursor == null || cursor.getCount() == 0) {
             Toast.makeText(this, "No movies found for: " + query, Toast.LENGTH_SHORT).show();
@@ -131,42 +162,41 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
+    private void loadMovies() {
+        Cursor cursor;
 
-        if (id == R.id.action_profile) {
-            startActivity(new Intent(this, ProfileActivity.class));
-            return true;
-        } else if (id == R.id.action_logout) {
-            sessionManager.logoutUser();
-            Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show();
-
-            // Go back to WelcomeActivity and clear back stack
-            Intent i = new Intent(this, WelcomeActivity.class);
-            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(i);
-            return true;
+        if (sessionManager.isLoggedIn()) {
+            int userId = sessionManager.getUserId();
+            String prefs = dbManager.getUserPreferences(userId); // ex: "Comedy,Drama,Sci-Fi"
+            cursor = dbManager.getMoviesForHomePersonalized(userId, prefs);
+        } else {
+            cursor = dbManager.getAllMovies();
         }
 
-        return super.onOptionsItemSelected(item);
-    }
-
-    private void setupRecyclerView() {
-        recyclerView = findViewById(R.id.recycler_view);
-        GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setHasFixedSize(true);
-    }
-
-    private void loadMovies() {
-        Cursor cursor = dbManager.getAllMovies();
         if (adapter == null) {
             adapter = new MovieAdapter(cursor);
             recyclerView.setAdapter(adapter);
         } else {
             adapter.swapCursor(cursor);
         }
+    }
+
+    private void setupBackPressBehavior() {
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (searchView != null && !searchView.isIconified()) {
+                    searchView.setIconified(true);
+                } else {
+                    setEnabled(false);
+                    HomeActivity.super.onBackPressed();
+                }
+            }
+        });
+    }
+
+    private void open(Class<?> cls) {
+        startActivity(new Intent(this, cls));
     }
 
     @Override

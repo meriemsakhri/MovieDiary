@@ -1,0 +1,5 @@
+<resources>
+    <style name="YellowRatingBar" parent="@android:style/Widget.RatingBar">
+        <item name="android:progressDrawable">@drawable/ratingbar_yellow</item>
+    </style>
+</resources>

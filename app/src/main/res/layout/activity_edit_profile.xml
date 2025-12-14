@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:fitsSystemWindows="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Edit Profile"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/purple_500"
+            android:gravity="center"
+            android:layout_marginBottom="18dp"/>
+
+        <EditText
+            android:id="@+id/etUsername"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Username"/>
+
+        <EditText
+            android:id="@+id/etEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Email"
+            android:inputType="textEmailAddress"
+            android:layout_marginTop="12dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Preferred genres"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <CheckBox
+                android:id="@+id/cbAction"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Action"/>
+
+            <CheckBox
+                android:id="@+id/cbDrama"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Drama"/>
+
+            <CheckBox
+                android:id="@+id/cbComedy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Comedy"/>
+
+            <CheckBox
+                android:id="@+id/cbCrime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Crime"/>
+
+            <CheckBox
+                android:id="@+id/cbRomance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Romance"/>
+
+            <CheckBox
+                android:id="@+id/cbSciFi"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sci-Fi"/>
+
+            <CheckBox
+                android:id="@+id/cbAdventure"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Adventure"/>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnSaveProfile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save"
+            android:textAllCaps="false"
+            android:layout_marginTop="20dp"/>
+    </LinearLayout>
+</ScrollView>

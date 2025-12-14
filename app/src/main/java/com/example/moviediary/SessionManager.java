@@ -49,4 +49,11 @@ public class SessionManager {
         editor.clear();
         editor.commit();
     }
+
+    public void updateSession(String username, String email) {
+        editor.putString(KEY_USERNAME, username);
+        editor.putString(KEY_EMAIL, email);
+        editor.commit();
+    }
+
 }
