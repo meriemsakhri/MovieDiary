@@ -80,4 +80,4 @@ MovieDiary est une application Android de **journal de cinéma** : elle permet �
 ## 🚀 Installation / Lancement
 1. Cloner le projet :
    ```bash
-   git clone https://github.com/USERNAME/MovieDiary.git
+   git clone https://github.com/meriemsakhri/MovieDiary.git
